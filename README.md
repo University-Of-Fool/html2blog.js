@@ -19,7 +19,7 @@ node html2blog -u <爬取的链接> -f <输出的博客文件> -p <图片文件�
 <a href="/config.toml"><code>config.toml</code></a> 内一目了然。
 
 ## 拓展阅读
-* https://github.com/University-Of-Fool/md2wp.py) - 从 Markdown 文件生成 WordPress 页面
+* [md2wp.py](https://github.com/University-Of-Fool/md2wp.py) - 从 Markdown 文件生成 WordPress 页面
 
 ## LICENSE
 MIT。
