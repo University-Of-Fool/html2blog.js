@@ -51,40 +51,65 @@ function loadDOM(_html,argument){
         //node.src=(`/img/${argument.imagePrefix}/${argument.imagePrefix}-${n}.webp`);
     });// 选择所有的 img 元素并改写图片引用路径
 
-    div.querySelectorAll('div.wp-block-image').forEach(function(node,n){
-        var imgouter=`<img src="${parse.parseTemplate(argument.genImagePath, argument.imagePrefix, n, function(){
-            if(argument.webp){return "webp";}else{return "png";}
-        })}" ></img>`;
-        node.outerHTML=imgouter;
-    });// 去除 img 外层的 <div> 和多余参数
-
     /***********
      * 
      * 以下代码只适用于特定的网页，请按需更改！
      * 
      ***********/
+
+    /*
+     * 去除 img 外层的 <div> 和多余参数
+     * 适用于： WordPress
+     */
+    div.querySelectorAll('div.wp-block-image').forEach(function(node,n){
+        var imgouter=`<img src="${parse.parseTemplate(argument.genImagePath, argument.imagePrefix, n, function(){
+            if(argument.webp){return "webp";}else{return "png";}
+        })}" ></img>`;
+        node.outerHTML=imgouter;
+    });
+
+    /*
+     * 去除所有的内联样式表
+     * 适用于： 很多网站
+     */
     div.querySelectorAll('style').forEach(function(node){
         node.outerHTML=null;
-    });// 去除所有的样式表
+    });
 
+    /*
+     * 去除标题外层的 span
+     * 适用于： WordPress
+     */
     div.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(function(node){
         var headingText=node.textContent;
         node.innerHTML=headingText;
-    });// 去除标题外层的 span
+    });
 
+    /* 
+     * 去除 highlight 插件添加的代码语言
+     * 适用于： 使用了 Syntax-highlighting Code Block (with Server-side Rendering)
+     *              插件的 WordPress
+     */
     div.querySelectorAll('small.shcb-language').forEach(function(node){
         node.outerHTML=null;
-    });// 去除 highlight 插件添加的代码语言
+    });// 
 
+    /* 
+     * 使 <pre> 只保留内部代码
+     * 适用于： 使用了 Syntax-highlighting Code Block (with Server-side Rendering)
+     *              插件的 WordPress
+     */
     div.querySelectorAll('pre').forEach(function(node){
         var codeText=node.textContent;
         node.outerHTML=`<pre><code>${codeText}\n</code></pre>`;
-    });// 使 <pre> 只保留内部代码
+    });
+
     /***********
      * 
      * 以上代码只适用于特定的网页，请按需更改！
      * 
      ***********/
+
     var html=new String();
     div.innerHTML.split('\n').forEach(function(line){
         if(line!=new String()){
