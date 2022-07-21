@@ -1,0 +1,24 @@
+[Download]
+protocol="https" # http or https
+
+[WebP]
+convert=true # 是否把图片转换成 WebP
+loseless=false # 是否无损
+loseless_compress=9 # 无损压缩级别，0-9 之间的整数
+alpha_quality=50 # WebP 透明度质量，数字 0-100 ，单位是 % (若启用无损则不生效)
+quality=70 # WebP 画质，数字 0-100 ，单位是 % (若启用无损则不生效)
+
+[Output]
+output_dir="output" # 输出文件夹的路径
+cache_dir="cache" # 缓存文件夹的路径
+img_path='%p/%p-%n.%f' # 图像路径（相对于输出文件夹）
+# img_path 可用的特殊字符（大小写敏感）：
+# %p：命令行参数里的 image-prefix
+# %n：序号 
+# %f：格式
+
+[Generate]
+markdown=true # 是否转换成 Markdown 格式
+img_path='/img/%p/%p-%n.%f' # 网站上的图像路径，特殊符号同上
+
+

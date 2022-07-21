@@ -8,7 +8,7 @@
 const fs=require("node:fs");
 
 // 引入 https
-const https=require('https');
+var webProtocol;
 
 // 引入颜色
 const colors=require('colors-console');
@@ -17,12 +17,17 @@ const colors=require('colors-console');
 const jsdom=require("jsdom");
 const { JSDOM } = jsdom;
 
+// 引入 path （用来创建文件夹）
+const path=require("path");
+
 // 引入 WEBP 转换器
 const webp=require('webp-converter');
 
 // 引入 async 流程控制器
 const async=require('async');
 
+// 引入 parse.js
+const parse=require("./parse.js");
 
 // 引入 Turndown
 var TurndownService = require('turndown');
@@ -51,7 +56,9 @@ function loadDOM(_html,argument){
     });// 选择所有的 img 元素并改写图片引用路径
 
     div.querySelectorAll('div.wp-block-image').forEach(function(node,n){
-        var imgouter=`<img src="/img/${argument.imagePrefix}/${argument.imagePrefix}-${n}.webp" ></img>`;
+        var imgouter=`<img src="${parse.parseTemplate(argument.genImagePath, argument.imagePrefix, n, function(){
+            if(argument.webp){return "webp";}else{return "png";}
+        })}" ></img>`;
         node.outerHTML=imgouter;
     });// 去除 img 外层的 <div> 和多余参数
 
@@ -89,31 +96,43 @@ function loadDOM(_html,argument){
         }
     });//去除空行
 
-    var markdown=turndownService.turndown(html);//转换 Markdown
+    var output
+    if(argument.markdown){
+        output=turndownService.turndown(html);//转换 Markdown
+        info("文件已改写");
+    }
+    else{
+        output=html;
+    }
 
-    info("文件已改写");
-    
-    try{fs.writeFileSync(`./output/${argument.filename}`, markdown, 'utf8');}
+    try{fs.writeFileSync(`${argument.outputDir}/${argument.filename}`, output, 'utf8');}
     catch(err){
         console.error(err);
         console.log(colors("red", "FATAL"), "出现错误");
         process.exit(1);
     }
-    info("Markdown 文件已写入");
+    var fileType;
+    if(argument.markdown){
+        fileType="Markdown";
+    }
+    else{
+        fileType="HTML"
+    }
+    info(`${fileType} 文件已写入`);
     return srcs;
 }
 
 // 从网站下载图片的方法，单独分一个方法是为了避免异步
 function processSingleImage(source,n,argument){
     info(`正在下载图片 ${n+1}`);
-    https.get(source, function (response) {
+    webProtocol.get(source, function (response) {
         var data=new String(); // 文件内容总是字符串
         response.setEncoding("binary"); // 不设置成 binary 会导致乱码
         response.on("data", function (chunk) {
             data+=chunk;
         });
         response.on("end",function(){
-            fs.writeFileSync(('./cache/' + n.toString() + '.png'), data, 'binary'/* 同上 */, err => {
+            fs.writeFileSync((`${argument.cacheDir}/${n.toString()}.png`), data, 'binary'/* 同上 */, err => {
                 if (err) {
                     console.error(err);
                     console.log(colors("red", "FATAL"), "出现错误");
@@ -121,30 +140,53 @@ function processSingleImage(source,n,argument){
                 }
             });
             info(`图片 ${n+1} 下载完成`);
-            try{
-            webp.cwebp(`./cache/${n}.png`,`./output/${argument.imagePrefix}/${argument.imagePrefix}-${n}.webp`,"-q 70 -alpha_q 50");
+            if(argument.webp){
+                try{
+                webp.cwebp(`${argument.cacheDir}/${n}.png`,`${argument.outputDir}/${parse.parseTemplate(argument.outputImagePath, argument.imagePrefix, n,"webp")}`,argument.webpArg);
+                }
+                catch(err){
+                     console.error(err);
+                    console.log(colors("red", "FATAL"), "出现错误");
+                    process.exit(1);
+               }
+               finally{
+                   info(`图片 ${n+1} 转换完成`);
+               }
             }
-            catch(err){
-                console.error(err);
-                console.log(colors("red", "FATAL"), "出现错误");
-                process.exit(1);
-            }
-            finally{
-                info(`图片 ${n+1} 转换完成`);
+            else{
+                try{
+                    var img=fs.readFileSync(`${argument.cacheDir}/${n.toString()}.png`, 'binary');
+                    fs.writeFileSync(`${argument.outputDir}/${parse.parseTemplate(argument.genImagePath, argument.imagePrefix, n,"webp")}`, img, 'binary');
+                }
+                catch(err){
+                    console.error(err);
+                   console.log(colors("red", "FATAL"), "出现错误");
+                   process.exit(1);
+                }
+                finally{
+                    info(`图片 ${n+1} 复制完成`);
+                }
             }
         })
     })
 }
 
 function processImages(srcs,argument){
-    info(`开始下载和转换图片，总计 ${srcs.length.toString()} 个`);
+    info(`开始下载和处理图片，总计 ${srcs.length.toString()} 个`);
     srcs.forEach(function(value,key){
         processSingleImage(value, key, argument);
     });
 }
 
 function createDir(dir){
-    try{fs.mkdirSync(dir);}
+    var brk=false;
+    try{
+        fs.mkdirSync(dir);
+        while(!brk){
+            dir=path.dirname(dir);
+            fs.mkdirSync(dir);
+        }
+    }
     catch(err){
         if(err.code!="EEXIST"){ // EEXIST: 文件夹已存在
             console.error(err);
@@ -156,12 +198,14 @@ function createDir(dir){
 }
 exports.startGenerating = function(html,argument){
     info("开始生成");
+    webProtocol=require(argument.protocol);
     var srcs;
     async.series([
         function(callback){
-            createDir(`./output/`);
-            createDir(`./cache/`);
-            createDir(`./output/${argument.imagePrefix}`);
+            createDir(`${argument.outputDir}`);
+            createDir(`${argument.cacheDir}`);
+            createDir( `${path.dirname(argument.outputDir + "/" + argument.filename)}`);
+            createDir(`${argument.outputDir}/${parse.parseTemplate(path.dirname(argument.outputImagePath), argument.imagePrefix, 0, "0")}`);
             callback(null,"createdir");
         },
         function(callback){
