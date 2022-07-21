@@ -3,6 +3,7 @@
 
 ## 使用
 ```bash
+npm install
 node html2blog <爬取的链接> <生成的文件> <图片文件的前缀>
 ```
 生成的文件可以在 output/ 看到。
