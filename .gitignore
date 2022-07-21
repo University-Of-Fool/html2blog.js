@@ -104,6 +104,6 @@ dist
 .tern-port
 
 # html2blog file
-cache/*
-output/*
+cache/
+output/
 package-lock.json

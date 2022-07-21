@@ -89,15 +89,15 @@ function processImages(srcs,argument){
     });
 }
 
-function createDir(argument){
-    try{fs.mkdirSync(`./output/${argument.imagePrefix}`);}
+function createDir(dir){
+    try{fs.mkdirSync(dir);}
     catch(err){
         if(err.code!="EEXIST"){ // EEXIST: 文件夹已存在
             console.error(err);
             console.log(colors("red", "FATAL"), "出现错误");
             process.exit(1);
         }
-        console.log(colors("yellow", "WARN"), `目录 ${argument.imagePrefix} 已存在`);
+        console.log(colors("yellow", "WARN"), `目录 ${dir} 已存在`);
     }
 }
 exports.startGenerating = function(html,argument){
@@ -105,17 +105,20 @@ exports.startGenerating = function(html,argument){
     var srcs;
     async.series([
         function(callback){
+            createDir(`./output/`);
+            createDir(`./cache/`);
+            createDir(`./output/${argument.imagePrefix}`);
+            callback(null,"createdir");
+        },
+        function(callback){
             srcs= loadDOM(html,argument);
             callback(null,"loaddom");
         },
         function(callback){
-             processImages(srcs,argument);
+            processImages(srcs,argument);
             callback(null,"downimage");
         },
-        function(callback){
-             createDir(argument);
-            callback(null,"createdir");
-        },
+
         function(callback){
             info("生成完成！");
             callback(null,"done");
