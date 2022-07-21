@@ -31,11 +31,7 @@ const parse=require("./parse.js");
 
 // 引入 Turndown
 var TurndownService = require('turndown');
-var turndownService = new TurndownService({
-    codeBlockStyle: "fenced",
-    fence: '```',
-    headingStyle: "atx"
-});
+var turndownService;
 
 // 简单的 log 方法，输出以绿色 INFO 开头的文字
 function info(information){
@@ -199,6 +195,8 @@ function createDir(dir){
 exports.startGenerating = function(html,argument){
     info("开始生成");
     webProtocol=require(argument.protocol);
+    var turndownOptions=argument.mdConfig;
+    turndownService=new TurndownService(turndownOptions);
     var srcs;
     async.series([
         function(callback){

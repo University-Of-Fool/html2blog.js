@@ -50,7 +50,15 @@ var args={ // 使用命令行参数初始化 args 变量
   cacheDir: config.Output.cache_dir,
   outputImagePath: config.Output.img_path,
   markdown: config.Generate.markdown,
-  genImagePath: config.Generate.img_path
+  genImagePath: config.Generate.img_path,
+  mdConfig:{
+    headingStyle: config.Markdown.heading,
+    bulletListMarker: config.Markdown.bullet,
+    codeBlockStyle: config.Markdown.codeBlockStyle,
+    fence: config.Markdown.codeBlockFence,
+    emDelimiter: config.Markdown.emDelimiter,
+    strongDelimiter: config.Markdown.strongDelimiter
+  }
 }
 var htmlString=new String();
 
