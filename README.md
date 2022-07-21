@@ -13,7 +13,7 @@ node html2blog -u <爬取的链接> -f <输出的博客文件> -p <图片文件�
 你也可以在 config.toml 里自定义图片路径
 
 ## 配置
-`config.toml` 内一目了然。
+<a href="/config.toml"><code>config.toml</code></a> 内一目了然。
 
 ## LICENSE
 MIT。
