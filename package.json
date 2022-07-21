@@ -13,6 +13,7 @@
     "async": "^3.2.4",
     "colors-console": "^1.0.3",
     "jsdom": "^20.0.0",
+    "turndown": "^7.1.1",
     "webp-converter": "^2.3.3"
   }
 }

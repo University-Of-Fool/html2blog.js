@@ -16,10 +16,18 @@ const { JSDOM } = jsdom;
 // 引入 WEBP 转换器
 const webp=require('webp-converter');
 
-// 引入  流程控制器
+// 引入 async 流程控制器
 const async=require('async');
 const { createDiffieHellman } = require("node:crypto");
 const { resolve } = require("node:path");
+
+// 引入 Turndown
+var TurndownService = require('turndown');
+var turndownService = new TurndownService({
+    codeBlockStyle: "fenced",
+    fence: '```',
+    headingStyle: "atx"
+});
 
 // 简单的 log 方法，输出以绿色 INFO 开头的文字
 function info(information){
@@ -27,25 +35,68 @@ function info(information){
 }
 
 
-function loadDOM(html,argument){
+function loadDOM(_html,argument){
     //载入DOM
-    const dom=new JSDOM(html);
+    const dom=new JSDOM(_html);
     var document=dom.window.document;
     var div=document.querySelector('div.entry-content'); // 选择文章入口元素，仅适用于单一网站，请记得修改
     info("DOM 已载入");
     var srcs=new Array();
     div.querySelectorAll('img').forEach(function(node,n){
         srcs[n]=node.src;
-        node.src=(`/img/${argument.imagePrefix}/${argument.imagePrefix}-${n}.webp`);
+        //node.src=(`/img/${argument.imagePrefix}/${argument.imagePrefix}-${n}.webp`);
     });// 选择所有的 img 元素并改写图片引用路径
-    info("图片路径已改写");
-    try{fs.writeFileSync(`./output/${argument.filename}`, div.innerHTML, 'utf8');}
+
+    div.querySelectorAll('div.wp-block-image').forEach(function(node,n){
+        var imgouter=`<img src="/img/${argument.imagePrefix}/${argument.imagePrefix}-${n}.webp" ></img>`;
+        node.outerHTML=imgouter;
+    });// 去除 img 外层的 <div> 和多余参数
+
+    /***********
+     * 
+     * 以下代码只适用于特定的网页，请按需更改！
+     * 
+     ***********/
+    div.querySelectorAll('style').forEach(function(node){
+        node.outerHTML=null;
+    });// 去除所有的样式表
+
+    div.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(function(node){
+        var headingText=node.textContent;
+        node.innerHTML=headingText;
+    });// 去除标题外层的 span
+
+    div.querySelectorAll('small.shcb-language').forEach(function(node){
+        node.outerHTML=null;
+    });// 去除 highlight 插件添加的代码语言
+
+    div.querySelectorAll('pre').forEach(function(node){
+        var codeText=node.textContent;
+        node.outerHTML=`<pre><code>${codeText}\n</code></pre>`;
+    });// 使 <pre> 只保留内部代码
+    /***********
+     * 
+     * 以上代码只适用于特定的网页，请按需更改！
+     * 
+     ***********/
+    var html=new String();
+    div.innerHTML.split('\n').forEach(function(line){
+        if(line!=new String()){
+            html+=`${line}\n`;
+        }
+    });//去除空行
+
+    var markdown=turndownService.turndown(html);//转换 Markdown
+
+    info("文件已改写");
+    
+    try{fs.writeFileSync(`./output/${argument.filename}`, markdown, 'utf8');}
     catch(err){
         console.error(err);
         console.log(colors("red", "FATAL"), "出现错误");
         process.exit(1);
     }
-    info("HTML 文件已写入");
+    info("Markdown 文件已写入");
     return srcs;
 }
 
