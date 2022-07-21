@@ -1,20 +1,29 @@
 [Download]
-protocol="https" # http or https
+# 下载文件时使用的协议
+# 允许值： 'http' 'https'
+protocol="https" 
 
 [WebP]
 # 是否把图片转换成 WebP
+# 允许值： true false
 convert=true 
 
 # 是否无损
+# 允许值： true false
 loseless=false 
 
-# 无损压缩级别，0-9 之间的整数
+# 无损压缩级别
+# 允许值： 0-9 之间的整数
 loseless_compress=9 
 
-# WebP 透明度质量，数字 0-100 ，单位是 % (若启用无损则不生效)
+# WebP 透明度质量（单位是 % ）
+# 允许值： 浮点数 0-100 
+# (若启用无损则不生效)
 alpha_quality=50 
 
-# WebP 画质，数字 0-100 ，单位是 % (若启用无损则不生效)
+# WebP 图片质量（单位是 % ）
+# 允许值： 浮点数 0-100 
+# (若启用无损则不生效)
 quality=70
 
 [Output]
@@ -25,11 +34,12 @@ output_dir="output"
 cache_dir="cache" 
 
 # 图像路径（相对于输出文件夹）
-img_path='%p/%p-%n.%f' 
 # img_path 可用的特殊字符（大小写敏感）：
 # %p：命令行参数里的 image-prefix
 # %n：序号 
 # %f：格式
+img_path='%p/%p-%n.%f' 
+
 
 [Generate]
 # 是否转换成 Markdown 格式
@@ -40,6 +50,7 @@ img_path='/img/%p/%p-%n.%f'
 
 [Markdown]
 # 标题格式
+# 允许值： 'setext' 'atx'
 # setext: 我是第三级标题
 #         ---
 # atx: ### 我是第三级标题 
@@ -50,11 +61,12 @@ heading="atx"
 bullet='*'
 
 # 代码块风格
+# 允许值： 'indented' 'fenced'
 # indented: 以缩进声明代码块
 # fenced: 以 ``` 或 ~~~ 标识声明代码块
 codeBlockStyle="indented"
 
-# 代码块 fence
+# 代码块表示
 # 允许值： '```' '~~~'
 codeBlockFence="```"
 
