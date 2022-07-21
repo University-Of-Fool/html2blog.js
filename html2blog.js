@@ -1,3 +1,10 @@
+#!/usr/bin/env node
+/*
+ *  HTML2BLOG.JS
+ *  (c) 2022 Lingrottin &
+ *           University of Fool
+ *  LISENCED UNDER MIT LICENSE
+ */
 // 引入https
 const https=require('node:https');
 const { argv } = require('node:process');

@@ -1,5 +1,9 @@
-const { stripVTControlCharacters } = require("node:util"); // 我也不知道这是什么，是 vsc 自己给我加的
-
+/*
+ *  HTML2BLOG.JS -> GENERATE.JS
+ *  (c) 2022 Lingrottin &
+ *           University of Fool
+ *  LISENCED UNDER MIT LICENSE
+ */
 // 引入文件系统
 const fs=require("node:fs");
 
@@ -18,8 +22,7 @@ const webp=require('webp-converter');
 
 // 引入 async 流程控制器
 const async=require('async');
-const { createDiffieHellman } = require("node:crypto");
-const { resolve } = require("node:path");
+
 
 // 引入 Turndown
 var TurndownService = require('turndown');
